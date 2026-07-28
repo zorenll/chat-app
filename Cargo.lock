@@ -3,5 +3,19 @@
 version = 4
 
 [[package]]
-name = "zord"
+name = "zord-client"
+version = "0.1.0"
+dependencies = [
+ "zord-shared",
+]
+
+[[package]]
+name = "zord-server"
+version = "0.1.0"
+dependencies = [
+ "zord-shared",
+]
+
+[[package]]
+name = "zord-shared"
 version = "0.1.0"

@@ -1,6 +1,8 @@
-[workspaces]
+[workspace]
 members = [
   "server",
   "client",
   "shared"
 ]
+
+resolver = "3"

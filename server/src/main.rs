@@ -1,4 +1,4 @@
-use std::{io::Read, io::Write, net::TcpListener, net::TcpStream};
+use std::{io::Read, io::Write, net::TcpListener};
 use zord_shared::Message;
 
 // Stream write protocol Packet1: Message size; Packet2: Message

@@ -1,3 +1,5 @@
+use std::{fs::File, io::Read};
+
 // Message protocol
 // Field             Size
 // ------------------------------
@@ -43,8 +45,9 @@ impl Message {
 
         let mut body_length = [0, 0];
         body_length.copy_from_slice(&data[address_end..address_end + 2]);
-        let body_length: u16 = u16::from_be_bytes(body_length);
-        let body_length: usize = usize::from(body_length + 2);
+        // let body_length: u16 = u16::from_be_bytes(body_length);
+        // let body_length: usize = usize::from(body_length + 2);
+        // ^~~~~~~~~~~~~~~~removed for now can reuse when more input fields are added
         let body_start: usize = address_end + 2;
 
         let mut body: Vec<u8> = Vec::new();
@@ -59,21 +62,79 @@ impl Message {
     }
 }
 
+pub fn tokenize(input: String, seperator: char) -> Vec<String> {
+    let mut out = vec![String::new()];
+
+    let mut index = 0;
+    for char in input.chars() {
+        if char != seperator {
+            out[index].push(char);
+        } else {
+            out.push(String::new());
+            index += 1;
+        }
+    }
+
+    return out;
+}
+
+pub fn toml_parser(file_path: &'static str) -> Vec<(String, String)> {
+    let mut config = File::open(file_path).expect("Failed to open file");
+
+    let mut contents = String::new();
+    config
+        .read_to_string(&mut contents)
+        .expect("Failed to read file");
+
+    let contents = tokenize(contents.trim().to_string(), ' ');
+
+    let mut variables: Vec<(String, String)> = vec![];
+
+    let mut index = 0;
+    for word in &contents {
+        let mut variable = (String::new(), String::new());
+        if word == "=" {
+            variable.0 = contents[index - 1].to_string();
+            variable.1 = contents[index + 1].to_string();
+            variables.push(variable);
+        }
+        index += 1;
+    }
+
+    return variables;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
+    fn message_test() {
         let message = Message {
             address: "mom".to_string(),
-            body: "I love you".to_string(),
+            body: "I got a tattoo".to_string(),
         };
 
         let message = message.encode();
 
         let message = Message::decode(message).expect("Failed to decode message");
         assert_eq!(message.address, "mom".to_string());
-        assert_eq!(message.body, "I love you".to_string());
+        assert_eq!(message.body, "I got a tattoo".to_string());
+    }
+
+    #[test]
+    fn tokenizer_test() {
+        let string = "word1 word2 word3".to_string();
+
+        let strings = tokenize(string, ' ');
+
+        assert_eq!(
+            strings,
+            [
+                "word1".to_string(),
+                "word2".to_string(),
+                "word3".to_string()
+            ]
+        );
     }
 }

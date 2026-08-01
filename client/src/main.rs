@@ -43,7 +43,12 @@ fn main() {
             body: input_body.trim().to_string(),
         };
 
-        send_message(&mut stream, message.encode());
+        let message_result = send_message(&mut stream, message.encode());
+
+        match message_result {
+            Ok(_) => println!("Delivered"),
+            Err(_) => println!("Undelivered"),
+        }
 
         stream.flush().expect("Failed to flush");
     }

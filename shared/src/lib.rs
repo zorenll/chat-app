@@ -124,12 +124,18 @@ pub fn toml_parser(file_path: &'static str) -> Vec<(String, String)> {
     return variables;
 }
 
-pub fn send_message(stream: &mut TcpStream, message: Vec<u8>) {
+pub fn send_message(stream: &mut TcpStream, message: Vec<u8>) -> Result<(), std::io::Error> {
     let message_length = message.len() as u16;
     stream
         .write(&message_length.to_be_bytes())
         .expect("Failed to write to stream");
     stream.write(&message).expect("Failed to write to stream");
+
+    let mut received: [u8; 8] = [0; 8];
+
+    let received_result = stream.read_exact(&mut received);
+
+    received_result
 }
 
 #[cfg(test)]

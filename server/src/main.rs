@@ -26,6 +26,8 @@ fn handle_client(mut stream: TcpStream) {
     let mut stream = &mut stream;
     let message_result = read_message(&mut stream);
 
+    println!("{:?}", "received".as_bytes());
+
     let message = match message_result {
         Ok(message) => {
             let _ = stream.write_all("received".as_bytes());

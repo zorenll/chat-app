@@ -1,39 +1,50 @@
 use std::{io::Write, net::TcpStream};
-use zord_shared::Message;
+use zord_shared::{Message, send_message, toml_parser};
 
+fn input() -> String {
+    let mut input = String::new();
+    std::io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+    input
+}
 fn main() {
-    let mut message = Message {
-        address: "".to_string(),
-        body: "".to_string(),
-    };
+    let config = toml_parser("client/config.toml");
 
-    println!("Address: ");
-    // std::io::stdout().flush().expect("Failed to flush stdout");
-    let mut address = String::new();
-    std::io::stdin()
-        .read_line(&mut address)
-        .expect("Failed to read line");
+    let mut ip = String::new();
 
-    println!("Body: ");
-    // std::io::stdout().flush().expect("Failed to flush stdout");
-    let mut body = String::new();
-    std::io::stdin()
-        .read_line(&mut body)
-        .expect("Failed to read line");
+    let mut username = String::new();
 
-    message.address = address.trim().to_string();
-    message.body = body.trim().to_string();
+    for variable in config {
+        match variable.0.as_str() {
+            "server_ip" => ip = format!("{}", variable.1.trim_matches('"')),
+            "server_port" => ip = format!("{}:{}", ip, variable.1.trim_matches('"')),
+            "username" => username = variable.1.trim_matches('"').to_string(),
+            _ => eprintln!("Incorrect config file"),
+        };
+    }
 
-    let ip = "127.0.0.1:4921";
-    let mut stream = TcpStream::connect(ip).expect("Failed to connect");
+    let mut stream = TcpStream::connect(&ip).expect("Failed to connect");
 
-    let message_encoded = message.encode();
-    let message_length = message_encoded.len() as u16;
+    // send_message(&mut stream, username.clone().into_bytes());
 
-    stream
-        .write(&message_length.to_be_bytes())
-        .expect("Failed to write to stream");
-    stream
-        .write(&message_encoded)
-        .expect("Failed to write to stream");
+    loop {
+        print!("To: ");
+        std::io::stdout().flush().expect("Failed to flush");
+        let input_to = input();
+
+        print!("Body: ");
+        std::io::stdout().flush().expect("Failed to flush");
+        let input_body = input();
+
+        let message = Message {
+            from: username.to_string(),
+            to: input_to.trim().to_string(),
+            body: input_body.trim().to_string(),
+        };
+
+        send_message(&mut stream, message.encode());
+
+        stream.flush().expect("Failed to flush");
+    }
 }

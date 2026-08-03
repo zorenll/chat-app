@@ -1,5 +1,5 @@
+use shared::{Message, toml_parser};
 use std::{io::Read, io::Write, net::TcpListener, net::TcpStream, thread::spawn};
-use zord_shared::{Message, toml_parser};
 
 // Stream write protocol Packet1: Message size; Packet2: Message
 fn read_message(stream: &mut TcpStream) -> Result<Message, &'static std::io::Error> {
@@ -25,8 +25,6 @@ fn read_message(stream: &mut TcpStream) -> Result<Message, &'static std::io::Err
 fn handle_client(mut stream: TcpStream) {
     let mut stream = &mut stream;
     let message_result = read_message(&mut stream);
-
-    println!("{:?}", "received".as_bytes());
 
     let message = match message_result {
         Ok(message) => {
@@ -61,14 +59,11 @@ fn main() {
 
     let listener = TcpListener::bind(ip).expect("Failed to bind to port");
 
-    // for stream in listener.incoming() {
     loop {
-        // let stream = stream.expect("Failed to stream man");
         let (stream, address) = listener.accept().expect("Failed to accept connection");
 
         println!("New connection from {}", address);
 
         spawn(move || handle_client(stream));
     }
-    // }
 }

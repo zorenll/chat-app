@@ -1,5 +1,5 @@
+use shared::{Message, send_message, toml_parser};
 use std::{io::Write, net::TcpStream};
-use zord_shared::{Message, send_message, toml_parser};
 
 fn input() -> String {
     let mut input = String::new();

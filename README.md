@@ -1,5 +1,5 @@
 
-# Zord
+# Chat app
 
-Personal chat app project using only std in rust
+Client-server messaging project
 
